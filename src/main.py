@@ -43,12 +43,20 @@ logger.addHandler(file_handler)
 """
 
 # 数据库配置
-db_info = {
+db_info_bak = {
     'url': 'rm-2zeep0s2kx565dbojrw.mysql.rds.aliyuncs.com',
     'username': 'pdl',
     'password': 'waB*RJ4Gytn9L#Z3azYM4R2DT3hEMsu@',
     'database': 'pdl',
     'port': 3306
+}
+
+db_info = {
+    'url': 'htouhuidev.mysql.rds.aliyuncs.com',
+    'username': 'pdl',
+    'password': 'Bb4HUxLW[dTb4aAEAsCkWvK3ZqexGsgD',
+    'database': 'pdl',
+    'port': 3666
 }
 
 
@@ -154,7 +162,35 @@ def down_to_local(file_path, local_flie_path):
 
 def execute():
     data = pd.read_excel(r'../resource/2017-11-23-13-03-34.xlsx', sheetname=u'导出结果', skiprows=0)
-    print data.head()
+    for i in range(len(data)):
+        if i == 5:
+            break
+
+        mobile = data[u'手机号'][i]
+
+        user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
+        user = select(user_sql)
+
+        try:
+            if user is None:
+                logger.error("could't find user with the phone number is %s", mobile)
+                continue
+
+            raised_sql = 'SELECT * FROM `pdl_user_raise_amount` WHERE `mobile` = %s' % mobile
+            raise_result = select(raised_sql)
+
+            if raise_result is None:
+                raise_sql = 'insert into `pdl_user_raise_amount` (user_id, mobile, amount, period ) values (%s, %s, %s, %s)'
+                param = (user['id'][0], mobile, '10', '14, 21')
+                insert(raise_sql, param)
+            else:
+                raise_sql = 'UPDATE `pdl_user_raise_amount` SET `amount` = amount + %s WHERE `user_id` = %s'
+                param = ('10', user['id'][0])
+                insert(raise_sql, param)
+
+            logger.info('%s raise amount success, amount : %s, mobile : %s' % (user['id'][0], '10', mobile))
+        except Exception, e:
+            logger.error('%s raise amount failure, amount : %s, mobile : %s, error : %s', *(user['id'][0], '10', mobile, e))
 
 
 #########################################################################################################################################
