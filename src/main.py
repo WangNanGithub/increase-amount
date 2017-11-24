@@ -198,7 +198,7 @@ def raise_amount():
                 logger.error('%s raise amount failure, amount : %s, mobile : %s, error : %s', *(user['id'][0], quota, mobile, e))
 
     logger.info('raise money end, total count : %s, success count : %s, failure count : %s', *(total_num, success_num, failure_num))
-    error_record.to_csv('../raise_amount_200_400_error.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
+    error_record.to_csv('../raise_amount_error.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
 
 
 #########################################################################################################################################
