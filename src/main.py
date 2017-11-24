@@ -138,7 +138,7 @@ def download(file_path):
         return None
 
 
-def down_to_local(file_path, local_flie_path):
+def down_to_local(file_path, local_file_path):
     # 阿里认证
     access_key_id = os.getenv('OSS_TEST_ACCESS_KEY_ID', oss_info['ACCESS_KEY_ID'])
     access_key_secret = os.getenv('OSS_TEST_ACCESS_KEY_SECRET', oss_info['ACCESS_KEY_SECRET'])
@@ -149,7 +149,7 @@ def down_to_local(file_path, local_flie_path):
     # 检查文件在系统中是否存在
     exist = bucket.object_exists(file_path)
     if exist:
-        bucket.get_object_to_file(file_path, local_flie_path)
+        bucket.get_object_to_file(file_path, local_file_path)
         return True
     else:
         return False
@@ -161,37 +161,52 @@ def down_to_local(file_path, local_flie_path):
 
 
 def execute():
-    data = pd.read_excel(r'../resource/2017-11-23-13-03-34.xlsx', sheetname=u'导出结果', skiprows=0)
-    for i in range(len(data)):
-        if i == 5:
-            break
+    logger.info('raise money start ...')
+    total_num, success_num, failure_num = 0, 0, 0
+    error_record = pd.DataFrame(columns=[u'手机号', u'额度'])
+    file_list = ['../resource/100.xls', '../resource/200.xls', '../resource/300.xls', '../resource/400.xls', '../resource/500.xls', ]
+    for f in file_list:
+        quota = int(f[-7:-4])
+        logger.info('start raise money %s ...', quota)
 
-        mobile = data[u'手机号'][i]
+        data = pd.read_excel(f, sheetname='Sheet1', skiprows=0)
+        for i in range(len(data)):
+            mobile = data[u'手机号'][i]
+            if i == 3:
+                break
+            total_num += 1
 
-        user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
-        user = select(user_sql)
+            user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
+            user = select(user_sql)
 
-        try:
-            if user is None:
-                logger.error("could't find user with the phone number is %s", mobile)
-                continue
+            try:
+                if user is None:
+                    failure_num += 1
+                    error_record.loc[error_record.shape[0] + 1] = {u'手机号': mobile, u'额度': quota}
+                    logger.error("could't find user with the phone number is %s", mobile)
+                    continue
 
-            raised_sql = 'SELECT * FROM `pdl_user_raise_amount` WHERE `mobile` = %s' % mobile
-            raise_result = select(raised_sql)
+                raised_sql = 'SELECT * FROM `pdl_user_raise_amount` WHERE `mobile` = %s' % mobile
+                raise_result = select(raised_sql)
 
-            if raise_result is None:
-                raise_sql = 'insert into `pdl_user_raise_amount` (user_id, mobile, amount, period ) values (%s, %s, %s, %s)'
-                param = (user['id'][0], mobile, '10', '14, 21')
-                insert(raise_sql, param)
-            else:
-                raise_sql = 'UPDATE `pdl_user_raise_amount` SET `amount` = amount + %s WHERE `user_id` = %s'
-                param = ('10', user['id'][0])
-                insert(raise_sql, param)
+                if raise_result is None:
+                    raise_sql = 'insert into `pdl_user_raise_amount` (user_id, mobile, amount, period ) values (%s, %s, %s, %s)'
+                    param = (user['id'][0], mobile, 1000 + quota, '14, 21')
+                    insert(raise_sql, param)
+                else:
+                    raise_sql = 'UPDATE `pdl_user_raise_amount` SET `amount` = amount + %s WHERE `user_id` = %s'
+                    param = (quota, user['id'][0])
+                    insert(raise_sql, param)
 
-            logger.info('%s raise amount success, amount : %s, mobile : %s' % (user['id'][0], '10', mobile))
-        except Exception, e:
-            logger.error('%s raise amount failure, amount : %s, mobile : %s, error : %s', *(user['id'][0], '10', mobile, e))
+                success_num += 1
+                logger.info('%s raise amount success, amount : %s, mobile : %s' % (user['id'][0], quota, mobile))
+            except Exception, e:
+                failure_num += 1
+                error_record.loc[error_record.shape[0] + 1] = {u'手机号': mobile, u'额度': quota}
+                logger.error('%s raise amount failure, amount : %s, mobile : %s, error : %s', *(user['id'][0], quota, mobile, e))
 
+    logger.info('raise money end, total count : %s, success count : %s, failure count : %s', *(total_num, success_num, failure_num))
+    error_record.to_csv('../raise_amount_error.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
 
 #########################################################################################################################################
 """
