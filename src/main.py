@@ -14,7 +14,7 @@ import time
 import oss2
 import os
 import logging
-import threading
+import thread
 
 #########################################################################################################################################
 """
@@ -249,18 +249,13 @@ def raise_300():
     error_record.to_csv('../raise_amount_300_error.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
 
 
-threads = []
-t1 = threading.Thread(target=raise_200)
-threads.append(t1)
-t2 = threading.Thread(target=raise_300)
-threads.append(t2)
-
-
 #########################################################################################################################################
 """
     执行入口
 """
 if __name__ == '__main__':
-    for t in threads:
-        t.setDaemon(True)
-        t.start()
+    try:
+        thread.start_new_thread(raise_200)
+        thread.start_new_thread(raise_300)
+    except:
+        print "Error: unable to start thread"
