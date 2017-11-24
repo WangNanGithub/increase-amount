@@ -166,8 +166,7 @@ def execute():
         for i in range(len(data)):
             mobile = data[u'手机号'][i]
             total_num += 1
-            if total_num > 1:
-                return
+
             user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
             user = select(user_sql)
 
