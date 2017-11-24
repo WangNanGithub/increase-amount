@@ -158,6 +158,7 @@ def execute():
     error_record = pd.DataFrame(columns=[u'手机号', u'额度'])
     file_list = ['../resource/100.xls', '../resource/200.xls', '../resource/300.xls', '../resource/400.xls', '../resource/500.xls', ]
     for f in file_list:
+        logger.info(f)
         quota = int(f[-7:-4])
         logger.info('start raise money %s ...', quota)
 
