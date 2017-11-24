@@ -43,20 +43,12 @@ logger.addHandler(file_handler)
 """
 
 # 数据库配置
-db_info_bak = {
+db_info = {
     'url': 'rm-2zeep0s2kx565dbojrw.mysql.rds.aliyuncs.com',
     'username': 'pdl',
     'password': 'waB*RJ4Gytn9L#Z3azYM4R2DT3hEMsu@',
     'database': 'pdl',
     'port': 3306
-}
-
-db_info = {
-    'url': 'htouhuidev.mysql.rds.aliyuncs.com',
-    'username': 'pdl',
-    'password': 'Bb4HUxLW[dTb4aAEAsCkWvK3ZqexGsgD',
-    'database': 'pdl',
-    'port': 3666
 }
 
 
