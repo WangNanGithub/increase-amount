@@ -157,7 +157,7 @@ def raise_amount():
     logger.info('raise money start ...')
     total_num, success_num, failure_num = 0, 0, 0
     error_record = pd.DataFrame(columns=[u'手机号', u'额度'])
-    file_list = ['../resource/500.xls', '../resource/400.xls', '../resource/300.xls', '../resource/200.xls', ]
+    file_list = ['../resource/300.xls', '../resource/200.xls', ]
     for f in file_list:
         logger.info(f)
         quota = int(f[-7:-4])
