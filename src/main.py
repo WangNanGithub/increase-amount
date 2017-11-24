@@ -164,8 +164,6 @@ def execute():
         data = pd.read_excel(f, sheetname='Sheet1', skiprows=0)
         for i in range(len(data)):
             mobile = data[u'手机号'][i]
-            if i == 3:
-                break
             total_num += 1
 
             user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
