@@ -158,6 +158,7 @@ def raise_amount():
     total_num, success_num, failure_num = 0, 0, 0
     error_record = pd.DataFrame(columns=[u'手机号', u'额度'])
     file_list = ['../resource/300.xls', '../resource/200.xls', ]
+    connect = open_connection()
     for f in file_list:
         logger.info(f)
         quota = int(f[-7:-4])
@@ -169,7 +170,7 @@ def raise_amount():
             total_num += 1
 
             user_sql = 'SELECT `id` FROM `pdl_user_basic` WHERE `mobile` = %s' % mobile
-            user = select(user_sql)
+            user = select(user_sql, db=connect)
 
             try:
                 if user is None:
@@ -179,16 +180,16 @@ def raise_amount():
                     continue
 
                 raised_sql = 'SELECT * FROM `pdl_user_raise_amount` WHERE `mobile` = %s' % mobile
-                raise_result = select(raised_sql)
+                raise_result = select(raised_sql, db=connect)
 
                 if raise_result is None:
                     raise_sql = 'insert into `pdl_user_raise_amount` (user_id, mobile, amount, period ) values (%s, %s, %s, %s)'
                     param = (user['id'][0], mobile, 1000 + quota, '14,21')
-                    insert(raise_sql, param)
+                    insert(raise_sql, param, db=connect)
                 else:
                     raise_sql = 'UPDATE `pdl_user_raise_amount` SET `amount` = amount + %s WHERE `user_id` = %s'
                     param = (quota, user['id'][0])
-                    insert(raise_sql, param)
+                    insert(raise_sql, param, db=connect)
 
                 success_num += 1
                 logger.info('%s raise amount success, amount : %s, mobile : %s' % (user['id'][0], quota, mobile))
@@ -199,7 +200,7 @@ def raise_amount():
 
     logger.info('raise money end, total count : %s, success count : %s, failure count : %s', *(total_num, success_num, failure_num))
     error_record.to_csv('../raise_amount_error.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
-
+    close_connection(connect)
 
 #########################################################################################################################################
 """
