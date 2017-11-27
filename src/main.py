@@ -181,8 +181,12 @@ threads.append(t2)
     执行入口
 """
 if __name__ == '__main__':
-    p = Pool()
-    p.apply_async(thread_1)
-    p.apply_async(thread_2)
-    p.close()
-    p.join()
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    # p = Pool()
+    # p.apply_async(thread_1)
+    # p.apply_async(thread_2)
+    # p.close()
+    # p.join()
