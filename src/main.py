@@ -158,6 +158,7 @@ def execute():
     print 'start ...'
     connect = open_connection()
     mobile_list = pd.read_csv('../resource/mobile.csv')
+    mobile_list[u'还款次数'] = None
     for i in range(len(mobile_list)):
         print i
         mobile = str(mobile_list['手机号'][i])
