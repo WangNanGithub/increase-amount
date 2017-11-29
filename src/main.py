@@ -153,40 +153,21 @@ def down_to_local(file_path, local_file_path):
     测试多线程
 """
 
-import time
-import threading
-from multiprocessing import Pool
-import os, time, random
 
-
-def thread_1():
-    for i in range(0, 100):
-        logger.info('thread - 1 : %s ', i)
-        time.sleep(2)
-
-
-def thread_2():
-    for i in range(0, 100):
-        logger.info('thread - 2 : %s ', i)
-        time.sleep(4)
-
-threads = []
-t1 = threading.Thread(target=thread_1)
-threads.append(t1)
-t2 = threading.Thread(target=thread_2)
-threads.append(t2)
+def execute():
+    connect = open_connection()
+    mobile_list = pd.read_csv('../resource/mobile.csv')
+    for i in range(len(mobile_list)):
+        mobile = str(mobile_list['手机号'][i])
+        sql = "select IFNULL(COUNT(*), 0) from pdl_loan_order where user_id = (select id from pdl_user_basic where mobile = %s) and status = 1000 and create_time < '2017-11-12'" % mobile
+        print sql
+        count = select(sql, connect)
+        mobile_list[u'还款次数'] = count
+    mobile_list.to_csv('/mnt/query_11_29.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
 
 #########################################################################################################################################
 """
     执行入口
 """
 if __name__ == '__main__':
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    # p = Pool()
-    # p.apply_async(thread_1)
-    # p.apply_async(thread_2)
-    # p.close()
-    # p.join()
+    execute()
