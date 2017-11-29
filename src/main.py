@@ -155,15 +155,18 @@ def down_to_local(file_path, local_file_path):
 
 
 def execute():
+    print 'start ...'
     connect = open_connection()
     mobile_list = pd.read_csv('../resource/mobile.csv')
     for i in range(len(mobile_list)):
+        print i
         mobile = str(mobile_list['手机号'][i])
         sql = "select IFNULL(COUNT(*), 0) from pdl_loan_order where user_id = (select id from pdl_user_basic where mobile = %s) and status = 1000 and create_time < '2017-11-12'" % mobile
         count = select(sql, connect)
         mobile_list[u'还款次数'][i] = count
     mobile_list.to_csv('/mnt/query_11_29.csv', mode='a+', encoding='utf-8', header=True, index=False, index_label=None)
     close_connection(connect)
+    print 'end ...'
 
 #########################################################################################################################################
 """
